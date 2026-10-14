@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "name": "cloud-infra-planner-alan-vo",
+  "owner": "ALANDVO",
+  "email": "alanvo@gmail.com",
+  "domain": "AI infrastructure planning / Infrastructure-as-Code generation",
+  "workflows": [
+    "Natural language -> Terraform/CloudFormation/ARM template generation with deterministic offline core and optional LLM advisory",
+    "IaC template validation (syntax, best practices, cloud-specific rules) with issue reporting",
+    "Cost estimation from component inventory or parsed templates"
+  ],
+  "auth": "jwt-cookie-session",
+  "llm_providers": [
+    "openai-compatible",
+    "anthropic",
+    "gemini",
+    "ollama"
+  ],
+  "summary": "Work in progress: cloud-infra-planner-alan-vo",
+  "status": "work-in-progress"
+}
