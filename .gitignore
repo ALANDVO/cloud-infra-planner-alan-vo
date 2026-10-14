@@ -1,15 +1,29 @@
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+*$py.class
+*.so
+.Python
 .venv/
 venv/
+.venv.bak/
 node_modules/
+frontend/node_modules/
 dist/
+frontend/dist/
 build/
 *.egg-info/
+.eggs/
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 *.log
 .DS_Store
-frontend/node_modules/
-frontend/dist/
+# Secrets / runtime state — never commit
+.env
+*.db
+*.sqlite
+# Local agent metadata (not product source)
+.antigravitycli/
+.omp/

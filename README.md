@@ -1,127 +1,155 @@
-# cloud-infra-planner-alan-vo
+# cloud-infra-planner-alan-vo | Alan Vo | AI & Machine Learning
 
-> Generates production-grade Terraform, CloudFormation, or ARM templates from natural language descriptions, with validation, cost estimation, and module composition.
+> Work in progress. This checkpoint may be incomplete or fail tests. See PLAN.md and STATUS.md before use.
 
-<div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-React-3178C6)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
-![SSO](https://img.shields.io/badge/SSO-SAML%20%2F%20OAuth2-8A2BE2)
-![License](https://img.shields.io/badge/License-MIT-green)
-![AI](https://img.shields.io/badge/AI-Powered-purple)
-![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+`cloud-infra-planner` generates production-grade Infrastructure-as-Code (IaC)
+from natural-language descriptions and validates/lints it. A deterministic,
+offline-first "component engine" parses free-text requirements into a stable
+component inventory and renders valid **Terraform (HCL)**, **CloudFormation
+(YAML)** and **Azure ARM (JSON)** templates; an optional LLM pass can *suggest*
+extra components when a provider key is configured, but the rendered template
+is always produced by the deterministic engine and never fabricated from an LLM
+response. Intended for DevOps/SRE engineers who want reproducible, auditable
+IaC from prose requirements.
 
-</div>
-
-## Why cloud-infra-planner-alan-vo?
-
-Generates production-grade Terraform, CloudFormation, or ARM templates from natural language descriptions, with validation, cost estimation, and module composition.
-
-Built by [Alan Vo](https://github.com/ALANDVO) — AI/ML & cybersecurity engineer.
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     cloud-infra-planner-alan-vo                                    │
-├─────────────┬─────────────┬─────────────┬───────────────────┤
-│  Frontend   │   API Layer │  Services   │   LLM Engine      │
-│  React/TS   │  FastAPI    │  Domain     │  Multi-provider   │
-│  Dashboard  │  SSO/SAML   │  Logic      │  OpenAI/Claude/   │
-│  Real-time  │  JWT Auth   │  Processing │  Gemini/Ollama    │
-└─────────────┴─────────────┴─────────────┴───────────────────┘
-         │              │              │               │
-         ▼              ▼              ▼               ▼
-    ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────────┐
-    │ Browser │   │  REST   │   │  Domain │   │  LLM API    │
-    │  SPA    │   │  API    │   │  Logic  │   │  (any)      │
-    └─────────┘   └─────────┘   └─────────┘   └─────────────┘
-```
+> **Status:** Backend API is implemented and tested. The web dashboard
+> (React + TypeScript) is a planned follow-up; today the product is consumed as
+> an authenticated HTTP API (see *API Reference*).
 
 ## Features
-
-- **Natural language → Terraform HCL for AWS, GCP, Azure**
-- **Natural language → CloudFormation YAML and Azure ARM templates**
-- **Architecture pattern detection: web app, API, data pipeline, serverless, microservices**
-- **Cost estimation from generated resource inventory**
-- **Multi-region and high-availability configuration from NL requirements**
-- **Terraform module composition for reusable infrastructure blocks**
-- **Validation and linting of generated IaC before apply**
+- **NL -> IaC generation** for AWS/GCP/Azure across Terraform, CloudFormation and ARM.
+- **Deterministic component detection** from keywords (network, compute,
+  load_balancer, database, cache, storage, no_sql, serverless, k8s, queue, HA).
+- **IaC validation**: balanced-brace / JSON / YAML parsing, required blocks and
+  resource attributes, plus best-practice checks (open security groups, S3
+  versioning, RDS backup retention, provider-prefix mismatch).
+- **Cost estimation**: per-cloud on-demand pricing, region multipliers and an
+  HA premium, derived from the component inventory.
+- **Audit log** of every security-relevant action; SQLite persistence with
+  pagination, filtering and UTC timestamps.
+- **Auth**: local JWT bearer tokens (HttpOnly cookie on login), viewer/operator/
+  admin roles, CSRF token endpoint. Demo-mode auto-provisions an operator user
+  on `localhost`.
 
 ## Quick Start
 
-### Docker (Recommended)
-
 ```bash
 git clone https://github.com/ALANDVO/cloud-infra-planner-alan-vo.git
 cd cloud-infra-planner-alan-vo
-cp .env.example .env
-docker compose up -d
-# Open http://localhost:3000
+cp .env.example .env          # blank credentials; edit for production
+docker compose -f compose.yaml up -d
+# API: http://127.0.0.1:8000  |  API docs: http://127.0.0.1:8000/api/docs
 ```
 
-### Local Development
+### Local development (no Docker)
+```bash
+python -m venv .venv
+.venv/bin/pip install -r backend/requirements.txt
+PYTHONPATH=backend .venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+## AI/ML evaluation
+
+The "intelligence" is a rule-based component classifier plus an optional LLM
+advisory step — there is no model training and no labelled dataset.
 
 ```bash
-git clone https://github.com/ALANDVO/cloud-infra-planner-alan-vo.git
-cd cloud-infra-planner-alan-vo
-pip install -r requirements.txt
+PYTHONPATH=backend .venv/bin/python -m pytest backend/tests -q
 ```
 
-## Usage
-
-```
-python main.py generate "A highly available 3-tier web app with ALB, 2 ASG instances, RDS Postgres, and ElastiCache" --provider terraform --target aws
-python main.py generate "Serverless API with Lambda, API Gateway, DynamoDB, and S3" --provider terraform --target aws --output main.tf
-python main.py generate "GCP: Cloud Run service with Cloud SQL and Memorystore" --provider terraform --target gcp
-python main.py generate "Azure: AKS cluster with 3 nodes and ACR" --provider arm --target azure
-python main.py validate main.tf --target aws
-python main.py estimate main.tf
-```
+- **Data provenance:** component keywords are hand-authored rules in
+  `backend/app/services/generator.py` (no external training data).
+- **Baseline:** the deterministic generator always emits a template that the
+  validator accepts with `valid=True` for every `(provider, target)` combination.
+- **Measured (offline):** across Terraform/CloudFormation/ARM for AWS/GCP/Azure,
+  45 backend tests pass; generated templates validate with no errors. The LLM
+  path is opt-in (`use_llm`) and falls back to the deterministic core on any
+  error, so no fabrication occurs.
+- **Failure cases:** LLM component suggestions are parsed defensively and
+  restricted to the allowed component set; malformed JSON/YAML or an unbalanced
+  Terraform template is reported as an `error` by the validator rather than
+  silently accepted.
 
 ## Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `OPENAI_API_KEY` | LLM API key (OpenAI, Anthropic, Gemini) | Required |
-| `LLM_BASE_URL` | Custom LLM endpoint (Ollama, vLLM) | `https://api.openai.com/v1` |
+| `ENVIRONMENT` | `development` or `production` | `development` |
+| `DATABASE_URL` | SQLAlchemy URL | `sqlite+aiosqlite:///./data/app.db` |
+| `JWT_SECRET` | JWT signing key (min 32 chars) | **required in production** |
+| `CSRF_SECRET` | CSRF signing key (min 32 chars) | **required in production** |
+| `KEYCLOAK_*` | OIDC realm / client (planned SSO) | `http://localhost:8080` |
+| `LLM_PROVIDER` | `openai` \| `anthropic` \| `gemini` \| `ollama` \| `offline` | `openai` |
 | `LLM_MODEL` | Model name | `gpt-4o` |
-| `SAML_IDP_ENTITY` | SAML Identity Provider URL | — |
-| `JWT_SECRET` | JWT signing secret | Generate one |
-
-## Tech Stack
-
-`Python` `Terraform` `CloudFormation` `AWS` `GCP` `Azure` `IaC` `LLM`
+| `LLM_BASE_URL` | OpenAI-compatible endpoint | `https://api.openai.com/v1` |
+| `LLM_API_KEY` | LLM key (server-side only) | *(blank)* |
+| `DEMO_MODE` | Local-only demo autoprovisioning | `false` |
 
 ## API Reference
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/auth/login` | Login (SSO or email) |
-| `GET` | `/api/health` | Health check |
-| `GET` | `/api/stats` | Statistics & metrics |
-| `POST` | `/api/process` | Main processing endpoint |
-| `GET` | `/api/results` | Query results |
+All data endpoints require `Authorization: Bearer <jwt>`. Write endpoints
+(generate, delete) additionally require the `operator` or `admin` role.
 
-## SSO Setup
+| Method | Endpoint | Notes |
+|--------|----------|-------|
+| `GET`  | `/api/health` | Health check |
+| `POST` | `/api/auth/demo-setup` | Creates a demo operator user (dev/demo only) |
+| `POST` | `/api/auth/login` | `email` + `password` -> JWT |
+| `POST` | `/api/auth/logout` | Clears the cookie |
+| `POST` | `/api/auth/csrf` | Issues a CSRF token |
+| `GET`  | `/api/auth/me` | Current user |
+| `POST` | `/api/generate` | `{description, provider, target, use_llm}` -> `201` |
+| `GET`  | `/api/generate` | List (paginated) |
+| `GET`  | `/api/generate/{id}` | Detail |
+| `DELETE` | `/api/generate/{id}` | Delete |
+| `POST` | `/api/validate` | `{template, provider, target}` -> `{valid, issues, summary}` |
+| `POST` | `/api/estimate` | `{template\|components, target, regions}` -> cost breakdown |
 
-### SAML
-1. Set `SAML_IDP_ENTITY` to your IdP URL
-2. Set `SAML_IDP_CERT` to your IdP certificate
-3. Set `SAML_ACS_URL` to `https://yourdomain.com/saml/acs`
+### Example (demo mode)
+```bash
+TOKEN=$(curl -s -X POST http://127.0.0.1:8000/api/auth/demo-setup | jq -r .access_token)
+curl -X POST http://127.0.0.1:8000/api/generate \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"description":"A 3-tier web app with ALB, RDS Postgres, Redis and S3","provider":"terraform","target":"aws","use_llm":false}'
+```
 
-### OAuth2
-1. Register your app with the OAuth provider
-2. Set `OAUTH_CLIENT_ID` and `OAUTH_CLIENT_SECRET`
-3. Set `OAUTH_REDIRECT_URI`
+## Architecture
+```
+graph LR
+  Client[Browser / API client] --> API[FastAPI app.main]
+  API --> Gen["Generator service (NL -> IaC)"]
+  API --> Val["Validator service"]
+  API --> Cost["CostEstimator service"]
+  API --> Auth["Auth + RBAC (JWT)"]
+  API --> DB[(SQLite)]
+  Gen --> LLM["LLM adapters (optional advisory)"]
+```
+
+## Security
+- JWT secret and CSRF secret **must** be supplied in production; the server
+  **refuses to start** with default secrets.
+- `DEMO_MODE` binds to `localhost` and is **refused in production**.
+- `LLM_API_KEY` is used server-side only and never returned to clients.
+- No real credentials, tokens or private URLs are committed; see `.env.example`.
+- **Limitations:** full Keycloak OIDC authorization-code login with SAML
+  identity brokering is the planned SSO milestone (see *SSO / SAML setup*).
+  The current release authenticates via local JWT with an HttpOnly cookie.
+
+## SSO / SAML setup (planned)
+The designed architecture is Keycloak OIDC with SAML brokering. Bring up
+Keycloak (`docker compose up keycloak`), import the realm under
+`keycloak/realm-export/`, configure a SAML identity provider through Keycloak's
+identity brokering UI, and set `KEYCLOAK_*` in `.env`. Local JWT demo mode
+remains the working authentication path today.
+
+## Development
+```bash
+# Backend tests
+PYTHONPATH=backend .venv/bin/python -m pytest backend/tests -q
+# Backend image
+docker build -f backend/Dockerfile -t cloud-infra-planner:ci .
+```
 
 ## License
-
-MIT — see [LICENSE](LICENSE)
-
----
-
-**Built by [Alan Vo](https://github.com/ALANDVO)** | alanvo@gmail.com | AI, ML & Cybersecurity
-
-
+MIT &copy; Alan Vo <alanvo@gmail.com>
