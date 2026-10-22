@@ -1,0 +1,11 @@
+/* frontend/src/styles/app.css */
+.app {
+  min-height: 100vh;
+}
+
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
