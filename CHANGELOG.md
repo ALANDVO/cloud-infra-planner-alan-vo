@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
 ## 1.0.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
@@ -10,6 +14,26 @@ All notable changes to this project are documented here. The format is
 
 ## [Unreleased]
 
+### Added
+- **React + TypeScript Vite frontend** (`frontend/`) with a complete dashboard for the three core workflows:
+  - **Generate**: Natural language form with provider/target selection and optional LLM advisory
+  - **History**: Paginated, filterable list of all generations with view/download/delete actions
+  - **Detail**: Full template view with syntax highlighting, validation panel, and cost estimation sidebar
+  - **Settings**: Profile, permissions, security, notifications, appearance
+- Typed API client (`frontend/src/api/client.ts`) derived from backend OpenAPI contracts
+- Syntax highlighting via `react-syntax-highlighter` for Terraform/CloudFormation/ARM templates
+- Responsive professional UI with loading/error/empty states throughout
+- 17 vitest unit tests covering GenerateForm, TemplateDisplay, and API client
+- Dockerfile and nginx config for production frontend serving
+- Added frontend to CI workflow (build + test)
+
+### Changed
+- Updated `compose.yaml` to include frontend service with reverse proxy to backend
+- Updated README with frontend quickstart and architecture diagram
+
+### Fixed
+- Removed legacy `main.py` and `llm_client.py` from root
+- Fixed TypeScript strict mode compliance across frontend codebase
 ## [1.0.0] - 2026-10-14
 ### Added
 - FastAPI backend with modular structure: `app/`, `api/`, `services/`, `models/`,

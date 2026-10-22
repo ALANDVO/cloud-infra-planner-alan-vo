@@ -92,11 +92,20 @@ Tests: `backend/tests/test_auth.py`
 
 ### frontend — React + TypeScript Vite Dashboard
 
-Status: planned
+Status: done
 
 Acceptance:
 - Typed API client derived from backend routes
-- Generate form, template display, cost panel, validation panel, dashboard
-- Loading/error/empty states; create/import/search/detail/export workflows
+- Generate form with description, provider, target, use_llm
+- Template display with syntax highlighting
+- Cost estimation panel
+- Validation panel
+- Dashboard with history list (pagination, filtering)
+- Loading/error/empty states
+- Create/import/search/detail/export workflows
 - vitest frontend tests (>=3)
+
+Implementation: `frontend/package.json`, `frontend/package-lock.json`, `frontend/tsconfig.json`, `frontend/vite.config.ts`, `frontend/Dockerfile`, `frontend/.dockerignore`, `frontend/index.html`, `frontend/src/main.tsx`, `frontend/src/App.tsx`, `frontend/src/api/client.ts`, `frontend/src/api/types.ts`, `frontend/src/components/GenerateForm.tsx`, `frontend/src/components/TemplateDisplay.tsx`, `frontend/src/components/CostPanel.tsx`, `frontend/src/components/ValidationPanel.tsx`, `frontend/src/components/HistoryList.tsx`, `frontend/src/components/GenerationDetail.tsx`, `frontend/src/components/Layout.tsx`, `frontend/src/components/LoginForm.tsx`, `frontend/src/components/Index.tsx`, `frontend/src/components/Settings.tsx`, `frontend/src/hooks/useAuth.ts`, `frontend/src/hooks/useGenerations.ts`, `frontend/src/styles/index.css`, `frontend/src/styles/theme.css`, `frontend/src/styles/base.css`, `frontend/src/styles/layout.css`, `frontend/src/styles/components.css`, `frontend/src/styles/utilities.css`, `frontend/src/styles/app.css`
+
+Tests: `frontend/src/components/GenerateForm.test.tsx`, `frontend/src/components/TemplateDisplay.test.tsx`, `frontend/src/api/client.test.ts`
 
