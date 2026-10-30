@@ -100,7 +100,7 @@
     {
       "id": "llm-adapters",
       "title": "Multi-Provider LLM Adapters",
-      "status": "in_progress",
+      "status": "done",
       "acceptance": [
         "OpenAI-compatible, Anthropic, Gemini, Ollama adapters in services/llm.py",
         "Configurable via LLM_PROVIDER, LLM_MODEL, LLM_BASE_URL",

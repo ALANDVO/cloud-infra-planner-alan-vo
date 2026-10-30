@@ -64,7 +64,7 @@ Tests: `backend/tests/test_cost_estimator.py`, `backend/tests/test_api_integrati
 
 ### llm-adapters — Multi-Provider LLM Adapters
 
-Status: in_progress
+Status: done
 
 Acceptance:
 - OpenAI-compatible, Anthropic, Gemini, Ollama adapters in services/llm.py
