@@ -31,7 +31,7 @@ class LLMAdapter(ABC):
 
 
 class OpenAICompatibleAdapter(LLMAdapter):
-    """OpenAI-compatible adapter (OpenAI, LiteLLM, OpenRouter, Ollama, vLLM)."""
+    """OpenAI-compatible adapter (OpenAI, LiteLLM, OpenRouter, vLLM)."""
 
     def __init__(self):
         self.api_key = settings.llm_api_key or os.environ.get("OPENAI_API_KEY")
@@ -58,12 +58,59 @@ class OpenAICompatibleAdapter(LLMAdapter):
 
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(f"{self.base_url}/chat/completions", headers=headers, json=payload)
-            response.raise_for_status()
+            # Redact sensitive info from error responses
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError as e:
+                # Redact API key from error message
+                error_msg = str(e)
+                if self.api_key and self.api_key in error_msg:
+                    error_msg = error_msg.replace(self.api_key, "[REDACTED]")
+                raise RuntimeError(f"LLM request failed: {error_msg}") from None
             data = response.json()
 
         return LLMResponse(
             content=data["choices"][0]["message"]["content"],
             provider="openai-compatible",
+            model=self.model,
+            usage=data.get("usage"),
+        )
+
+
+class OllamaAdapter(LLMAdapter):
+    """Ollama local LLM adapter (no API key required)."""
+
+    def __init__(self):
+        self.base_url = settings.llm_base_url.rstrip("/") or "http://localhost:11434"
+        self.model = settings.llm_model
+
+    def is_configured(self) -> bool:
+        return True  # Ollama doesn't require an API key
+
+    async def chat(self, messages: List[Dict[str, str]], temperature: float = 0.7, max_tokens: int = 2048) -> LLMResponse:
+        # Ollama uses OpenAI-compatible API at /v1/chat/completions
+        base = self.base_url
+        if not base.endswith("/v1"):
+            base = f"{base}/v1"
+
+        payload = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(f"{base}/chat/completions", json=payload)
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError as e:
+                raise RuntimeError(f"Ollama request failed: {e.response.status_code}") from None
+            data = response.json()
+
+        return LLMResponse(
+            content=data["choices"][0]["message"]["content"],
+            provider="ollama",
             model=self.model,
             usage=data.get("usage"),
         )
@@ -109,7 +156,13 @@ class AnthropicAdapter(LLMAdapter):
 
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(f"{self.base_url}/v1/messages", headers=headers, json=payload)
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError as e:
+                error_msg = str(e)
+                if self.api_key and self.api_key in error_msg:
+                    error_msg = error_msg.replace(self.api_key, "[REDACTED]")
+                raise RuntimeError(f"Anthropic request failed: {error_msg}") from None
             data = response.json()
 
         return LLMResponse(
@@ -154,7 +207,13 @@ class GeminiAdapter(LLMAdapter):
                 f"{self.base_url}/v1beta/models/{self.model}:generateContent?key={self.api_key}",
                 json=payload,
             )
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError as e:
+                error_msg = str(e)
+                if self.api_key and self.api_key in error_msg:
+                    error_msg = error_msg.replace(self.api_key, "[REDACTED]")
+                raise RuntimeError(f"Gemini request failed: {error_msg}") from None
             data = response.json()
 
         return LLMResponse(
@@ -189,7 +248,10 @@ def get_llm_adapter() -> LLMAdapter:
     if settings.demo_mode or provider == "offline":
         return OfflineAdapter()
 
-    if provider in ("openai", "openrouter", "litellm", "ollama", "vllm"):
+    if provider == "ollama":
+        return OllamaAdapter()
+
+    if provider in ("openai", "openrouter", "litellm", "vllm"):
         return OpenAICompatibleAdapter()
     elif provider == "anthropic":
         return AnthropicAdapter()
