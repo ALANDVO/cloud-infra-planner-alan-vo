@@ -1,7 +1,8 @@
+
 // frontend/src/components/GenerationDetail.tsx
 // Detailed view of a single generation with validation and cost
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import { useGeneration } from '../hooks/useGenerations';
@@ -70,18 +71,24 @@ export function GenerationDetail() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const ext = generation.provider === 'terraform' ? 'tf' : generation.provider === 'cloudformation' ? 'yaml' : 'json';
-    a.download = `infra-${generation.id}.${ext}`;
     a.href = url;
+    a.download = `infra-${generation.id}.${ext}`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
+  // Auto-run validation and estimation when generation loads
+  useEffect(() => {
+    if (generation?.template) {
+      handleValidate();
+      handleEstimate();
+    }
+  }, [generation?.template]);
+
   if (loading) {
     return (
       <div className="generation-detail loading">
-        <div className="skeleton skeleton-title"></div>
-        <div className="skeleton skeleton-row"></div>
-        <div className="skeleton skeleton-row"></div>
+        <div className="loading-spinner">Loading generation...</div>
       </div>
     );
   }
@@ -89,14 +96,12 @@ export function GenerationDetail() {
   if (error || !generation) {
     return (
       <div className="generation-detail error">
-        <div className="error-state">
-          <AlertTriangle size={32} />
-          <h3>Generation Not Found</h3>
-          <p>{error || 'Invalid generation ID'}</p>
-          <Link to="/history" className="btn btn-primary">
-            <ArrowLeft size={16} /> Back to History
-          </Link>
-        </div>
+        <AlertTriangle size={48} />
+        <h2>Generation Not Found</h2>
+        <p>{error || 'The requested generation could not be loaded.'}</p>
+        <Link to="/history" className="btn btn-primary">
+          Back to History
+        </Link>
       </div>
     );
   }
