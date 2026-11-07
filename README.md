@@ -153,3 +153,7 @@ docker build -f backend/Dockerfile -t cloud-infra-planner:ci .
 
 ## License
 MIT &copy; Alan Vo <alanvo@gmail.com>
+
+---
+
+Alan Vo · [alanvo.net](https://alanvo.net)

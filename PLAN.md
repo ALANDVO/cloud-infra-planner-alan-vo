@@ -109,3 +109,6 @@ Implementation: `frontend/package.json`, `frontend/package-lock.json`, `frontend
 
 Tests: `frontend/src/components/GenerateForm.test.tsx`, `frontend/src/components/TemplateDisplay.test.tsx`, `frontend/src/api/client.test.ts`
 
+---
+
+Alan Vo · [alanvo.net](https://alanvo.net)

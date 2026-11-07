@@ -87,3 +87,7 @@ All notable changes to this project are documented here. The format is
   production; the app refuses to boot in production with default secrets.
 - Demo mode binds to localhost and is refused in production.
 - No real credentials, tokens or private URLs are committed.
+
+---
+
+Alan Vo · [alanvo.net](https://alanvo.net)
