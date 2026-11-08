@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
 ## 1.3.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
@@ -23,6 +27,13 @@ All notable changes to this project are documented here. The format is
 ## [Unreleased]
 
 ### Added
+- **Keycloak OIDC Integration** (`backend/app/services/keycloak.py`, `keycloak/realm-export/realm.json`):
+  - OIDC authorization code flow endpoints: `GET /api/auth/oidc/login`, `GET /api/auth/oidc/callback`, `POST /api/auth/oidc/logout`
+  - Keycloak JWKS-based JWT token validation with automatic key rotation
+  - UserInfo endpoint integration for profile and role claims
+  - Automatic user provisioning from Keycloak with role mapping (admin/operator/viewer)
+  - Keycloak realm export with pre-configured client, roles, and test users
+  - Secure HttpOnly cookie handling for tokens and CSRF state
 - **React + TypeScript Vite frontend** (`frontend/`) with a complete dashboard for the three core workflows:
   - **Generate**: Natural language form with provider/target selection and optional LLM advisory
   - **History**: Paginated, filterable list of all generations with view/download/delete actions
@@ -38,10 +49,13 @@ All notable changes to this project are documented here. The format is
 ### Changed
 - Updated `compose.yaml` to include frontend service with reverse proxy to backend
 - Updated README with frontend quickstart and architecture diagram
+- Updated `backend/app/api/routes_auth.py` with OIDC endpoints and Keycloak integration
+- Extended `backend/app/services/keycloak.py` with full OIDC client implementation
 
 ### Fixed
 - Removed legacy `main.py` and `llm_client.py` from root
 - Fixed TypeScript strict mode compliance across frontend codebase
+
 ## [1.0.0] - 2026-10-14
 ### Added
 - FastAPI backend with modular structure: `app/`, `api/`, `services/`, `models/`,
@@ -73,12 +87,7 @@ All notable changes to this project are documented here. The format is
   HTTP workflows.
 
 ### Known limitations (planned / not yet implemented)
-- Frontend (React + TypeScript + Vite) is not yet built; the API is the current
-  interface. Tracked under the `frontend` feature.
-- Keycloak OIDC authorization-code login (state + nonce + PKCE) is the intended
-  SSO architecture but is not yet wired into the auth flow; the app currently
-  authenticates via local JWT (demo mode on `localhost`).
-- SAML identity brokering is documented as a future milestone.
+- Keycloak SAML identity brokering is documented as a future milestone.
 - LLM providers (Anthropic, Gemini, Ollama) are plumbed through adapters but not
   exercised in CI; all network LLM calls are mocked/unused offline.
 
