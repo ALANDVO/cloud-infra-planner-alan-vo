@@ -122,12 +122,14 @@
         "local JWT login with HttpOnly cookie + CSRF endpoint",
         "viewer/operator/admin roles enforced on data endpoints",
         "role denial and unauthenticated rejection tests",
-        "Keycloak OIDC + SAML identity brokering (planned)"
+        "Keycloak OIDC + SAML identity brokering (partially implemented: OIDC login/callback/logout endpoints, realm export, user provisioning)"
       ],
       "implementation": [
         "backend/app/core/security.py",
         "backend/app/core/config.py",
-        "backend/app/api/routes_auth.py"
+        "backend/app/api/routes_auth.py",
+        "backend/app/services/keycloak.py",
+        "keycloak/realm-export/realm.json"
       ],
       "tests": [
         "backend/tests/test_auth.py"
@@ -171,14 +173,7 @@
         "frontend/src/components/Index.tsx",
         "frontend/src/components/Settings.tsx",
         "frontend/src/hooks/useAuth.ts",
-        "frontend/src/hooks/useGenerations.ts",
-        "frontend/src/styles/index.css",
-        "frontend/src/styles/theme.css",
-        "frontend/src/styles/base.css",
-        "frontend/src/styles/layout.css",
-        "frontend/src/styles/components.css",
-        "frontend/src/styles/utilities.css",
-        "frontend/src/styles/app.css"
+        "frontend/src/hooks/useGenerations.ts"
       ],
       "tests": [
         "frontend/src/components/GenerateForm.test.tsx",

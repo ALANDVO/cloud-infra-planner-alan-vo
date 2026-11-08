@@ -84,9 +84,9 @@ Acceptance:
 - local JWT login with HttpOnly cookie + CSRF endpoint
 - viewer/operator/admin roles enforced on data endpoints
 - role denial and unauthenticated rejection tests
-- Keycloak OIDC + SAML identity brokering (planned)
+- Keycloak OIDC + SAML identity brokering (partially implemented: OIDC login/callback/logout endpoints, realm export, user provisioning)
 
-Implementation: `backend/app/core/security.py`, `backend/app/core/config.py`, `backend/app/api/routes_auth.py`
+Implementation: `backend/app/core/security.py`, `backend/app/core/config.py`, `backend/app/api/routes_auth.py`, `backend/app/services/keycloak.py`, `keycloak/realm-export/realm.json`
 
 Tests: `backend/tests/test_auth.py`
 
@@ -105,7 +105,7 @@ Acceptance:
 - Create/import/search/detail/export workflows
 - vitest frontend tests (>=3)
 
-Implementation: `frontend/package.json`, `frontend/package-lock.json`, `frontend/tsconfig.json`, `frontend/vite.config.ts`, `frontend/Dockerfile`, `frontend/.dockerignore`, `frontend/index.html`, `frontend/src/main.tsx`, `frontend/src/App.tsx`, `frontend/src/api/client.ts`, `frontend/src/api/types.ts`, `frontend/src/components/GenerateForm.tsx`, `frontend/src/components/TemplateDisplay.tsx`, `frontend/src/components/CostPanel.tsx`, `frontend/src/components/ValidationPanel.tsx`, `frontend/src/components/HistoryList.tsx`, `frontend/src/components/GenerationDetail.tsx`, `frontend/src/components/Layout.tsx`, `frontend/src/components/LoginForm.tsx`, `frontend/src/components/Index.tsx`, `frontend/src/components/Settings.tsx`, `frontend/src/hooks/useAuth.ts`, `frontend/src/hooks/useGenerations.ts`, `frontend/src/styles/index.css`, `frontend/src/styles/theme.css`, `frontend/src/styles/base.css`, `frontend/src/styles/layout.css`, `frontend/src/styles/components.css`, `frontend/src/styles/utilities.css`, `frontend/src/styles/app.css`
+Implementation: `frontend/package.json`, `frontend/package-lock.json`, `frontend/tsconfig.json`, `frontend/vite.config.ts`, `frontend/Dockerfile`, `frontend/.dockerignore`, `frontend/index.html`, `frontend/src/main.tsx`, `frontend/src/App.tsx`, `frontend/src/api/client.ts`, `frontend/src/api/types.ts`, `frontend/src/components/GenerateForm.tsx`, `frontend/src/components/TemplateDisplay.tsx`, `frontend/src/components/CostPanel.tsx`, `frontend/src/components/ValidationPanel.tsx`, `frontend/src/components/HistoryList.tsx`, `frontend/src/components/GenerationDetail.tsx`, `frontend/src/components/Layout.tsx`, `frontend/src/components/LoginForm.tsx`, `frontend/src/components/Index.tsx`, `frontend/src/components/Settings.tsx`, `frontend/src/hooks/useAuth.ts`, `frontend/src/hooks/useGenerations.ts`
 
 Tests: `frontend/src/components/GenerateForm.test.tsx`, `frontend/src/components/TemplateDisplay.test.tsx`, `frontend/src/api/client.test.ts`
 
