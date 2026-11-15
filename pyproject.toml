@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cloud-infra-planner"
-version = "1.0.0"
+version = "1.5.0"
 description = "Generates Terraform, CloudFormation, or ARM templates from natural-language descriptions, with validation, cost estimation, and module composition."
 readme = "README.md"
 requires-python = ">=3.11"
