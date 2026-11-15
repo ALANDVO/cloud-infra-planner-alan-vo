@@ -116,3 +116,11 @@ def test_production_requires_real_secrets(monkeypatch):
     monkeypatch.delenv("CSRF_SECRET", raising=False)
     with pytest.raises(RuntimeError):
         validate_production_settings(Settings())
+def test_csrf_token_endpoint(client):
+    """CSRF endpoint returns token and sets HttpOnly cookie."""
+    resp = client.post("/api/auth/csrf")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "csrf_token" in data
+    token = data["csrf_token"]
+    assert "csrf_token" in resp.cookies
