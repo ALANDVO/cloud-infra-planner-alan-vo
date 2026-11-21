@@ -65,11 +65,10 @@ def require_role(*allowed_roles: Role):
 
 
 @router.post("/csrf", response_model=CsrfResponse, tags=["auth"])
-async def get_csrf_token(request: Request):
+async def get_csrf_token(request: Request, response: Response):
     """Get a CSRF token for form submissions."""
     # In production, store in session; for stateless, return signed token
     token = generate_csrf_token()
-    response = Response(content="", media_type="application/json")
     # Set as HttpOnly cookie for cookie-based auth flows
     response.set_cookie(
         key="csrf_token",
