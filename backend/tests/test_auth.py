@@ -124,3 +124,21 @@ def test_csrf_token_endpoint(client):
     assert "csrf_token" in data
     token = data["csrf_token"]
     assert "csrf_token" in resp.cookies
+
+
+def test_login_return_token_and_cookie(client, operator):
+    """Login returns access_token in JSON body and sets HttpOnly cookie."""
+    resp = client.post(
+        "/api/auth/login",
+        json={"email": operator.email, "password": "password123"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "access_token" in data
+    token = data["access_token"]
+    # Cookie should be set (httponly enforced by browser, checked here for key presence)
+    assert "access_token" in resp.cookies
+    # Bearer token from JSON body should work for authorized requests
+    me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert me.status_code == 200
+    assert me.json()["email"] == operator.email
